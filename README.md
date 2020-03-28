@@ -46,8 +46,11 @@ Project showcasing creating a static website but still using EpiServer CMS for e
 
 
 
-## How to use ##
+## When is running? ##
 
 - Do changes for a page or block(must be placed on a page) in EpiServer and publish your changes.
 - StaticWebPlugin will now try to access your website and write back the result it gets to the folder you have entered.
- 
+
+
+## What extra functionality can be used ##
+- StaticWeb is registering a displaychannel called "StaticWeb" (See `Information.cshtml` and `Information.staticweb.cshtml` for examples on how to use it). It is perfect for removing functionality that can't be used in a static website (like filitering or search)
