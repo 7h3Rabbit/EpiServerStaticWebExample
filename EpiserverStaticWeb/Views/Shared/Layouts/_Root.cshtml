@@ -1,6 +1,7 @@
 ﻿@using System.Web.Optimization
 @using EPiServer.Framework.Web.Mvc.Html
 @using EpiserverStaticWeb.Business
+@using EpiserverStaticWeb.Business.Channels
 @model IPageViewModel<SitePageData>
 <!DOCTYPE html>
 <html lang="@Model.CurrentPage.LanguageBranch">
@@ -26,9 +27,13 @@
     </head>
 
     <body>
+        @{ 
+            Html.RenderPartial("Information", Model);
+        }
+
         @if (Model.Layout != null && Model.Layout.IsInReadonlyMode)
         {
-            Html.RenderPartial("Readonly", Model);
+                Html.RenderPartial("Readonly", Model);
         }
 
         @Html.RenderEPiServerQuickNavigator()
