@@ -14,14 +14,21 @@ Project showcasing creating a static website but still using EpiServer CMS for e
 - No serverside code requried
 - Very secure (hard to hack static pages)
 
-**Con**
+**Con/limitations**
 
 - No serverside dynamic content can be used
 - No serverside personalized content can be used
 - Only pages inheriting from PageData will trigger page write
 - Only block inheriting from BlockBata will trigger page write
+- Only supports following types:
+  - css (only support dependencies declared in url())
+  - javascript
+  - Web fonts (woff and woff2)
+  - Images (png, jpg, jpeg, jpe, gif, webp)
+  - documents (pdf)
+  - Icons (ico)
 
-## Requirement ##
+## Requirements ##
 
 - EpiServer 7.5+
 - .Net 4.7+
