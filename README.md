@@ -27,6 +27,7 @@ Project showcasing creating a static website but still using EpiServer CMS for e
 - .Net 4.7+
 - All pages need to inherit from PageData
 - All blocks needs to inherit from BlockData
+- Website has to return pages, javascript and css as UTF-8
 
 
 ## Installation ##
