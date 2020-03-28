@@ -1,1 +1,1 @@
-# EpiServerStaticWebExample
+# EpiServer - StaticWeb (Example)
