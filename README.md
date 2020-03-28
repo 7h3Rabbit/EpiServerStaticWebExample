@@ -22,7 +22,7 @@ Project showcasing creating a static website but still using EpiServer CMS for e
 - Only block inheriting from BlockBata will trigger page write
 - Only supports following types:
   - css (only support dependencies declared in url())
-  - javascript
+  - javascript (no dependencies)
   - Web fonts (woff and woff2)
   - Images (png, jpg, jpeg, jpe, gif, webp)
   - documents (pdf)
@@ -35,6 +35,7 @@ Project showcasing creating a static website but still using EpiServer CMS for e
 - All pages need to inherit from PageData
 - All blocks needs to inherit from BlockData
 - Website has to return pages, javascript and css as UTF-8
+- Must allow visits with user-agent `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36 StaticWebPlugin/0.1`
 
 
 ## Installation ##
