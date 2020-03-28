@@ -468,7 +468,6 @@
     <Content Include="Views\ContactBlock\Index.cshtml" />
     <Content Include="Views\ArticlePage\Index.cshtml" />
     <Content Include="Views\Shared\Information.cshtml" />
-    <Content Include="Views\Shared\staticweb\Information.cshtml" />
     <Content Include="Views\Shared\Information.staticweb.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
