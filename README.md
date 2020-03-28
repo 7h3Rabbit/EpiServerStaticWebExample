@@ -41,5 +41,13 @@ Project showcasing creating a static website but still using EpiServer CMS for e
 ## Installation ##
 
 - Copy StaticWebEventInit.cs into your project
+- Change `rootUrl` in StaticWebEventInit.cs to your website url (must allow anonymous access)
+- Change `rootPath` in StaticWebEventInit.cs to folder you want to write to (for example a GitHub repository folder)
 
+
+
+## How to use ##
+
+- Do changes for a page or block(must be placed on a page) in EpiServer and publish your changes.
+- StaticWebPlugin will now try to access your website and write back the result it gets to the folder you have entered.
  
