@@ -5,6 +5,7 @@ using EPiServer.Framework;
 using EPiServer.Framework.Initialization;
 using EPiServer.ServiceLocation;
 using EPiServer.Web.Routing;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -75,8 +76,11 @@ namespace EpiserverStaticWeb.Business
             }
 
             WebClient webClient = new WebClient();
+            webClient.Headers.Set(HttpRequestHeader.UserAgent, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36 StaticWebPlugin/0.1");
             webClient.Encoding = Encoding.UTF8;
             var html = webClient.DownloadString(rootUrl + orginalUrl);
+
+            html = TryToFixLinkUrls(html);
 
             EnsurePageResources(rootUrl, rootPath, html);
 
@@ -86,6 +90,24 @@ namespace EpiserverStaticWeb.Business
             }
 
             File.WriteAllText(rootPath + relativePath + "index.html", html);
+        }
+
+        private static string TryToFixLinkUrls(string html)
+        {
+            var urlResolver = ServiceLocator.Current.GetInstance<UrlResolver>();
+
+            var matches = Regex.Matches(html, "href=\"(?<resource>\\/link\\/[0-9a-f]{32}.aspx)\"");
+            foreach (Match match in matches)
+            {
+                var group = match.Groups["resource"];
+                if (group.Success)
+                {
+                    var resourceUrl = group.Value;
+                    var correctUrl = urlResolver.GetUrl(resourceUrl);
+                    html = html.Replace(resourceUrl, correctUrl);
+                }
+            }
+            return html;
         }
 
         private static void EnsurePageResources(string rootUrl, string rootPath, string html)
@@ -117,72 +139,50 @@ namespace EpiserverStaticWeb.Business
         {
             if (resourceUrl.StartsWith("/"))
             {
-                //switch (Path.GetExtension(resourceUrl).ToLower())
-                //{
-                //    case ".css":
-                //        break;
-                //    case ".js":
-                //    case ".woff":
-                //    case ".woff2":
-                //    case ".png":
-                //    case ".jpg":
-                //    case ".jpeg":
-                //    case ".jpe":
-                //    case ".gif":
-                //    case ".ico":
-                //    case ".pdf":
-                //        break;
-                //    case ".bmp":
-                //        break;
-                //}
-                // TODO: check if local file or db file
-                // TODO: download resource
-                if (resourceUrl.EndsWith(".css"))
+                switch (Path.GetExtension(resourceUrl).ToLower())
                 {
-                    EnsureCssResources(rootUrl, rootPath, resourceUrl);
-                }
-                else if (resourceUrl.EndsWith(".js")
-                || resourceUrl.EndsWith(".woff2")
-                || resourceUrl.EndsWith(".woff")
-                || resourceUrl.EndsWith(".png")
-                || resourceUrl.EndsWith(".webp")
-                || resourceUrl.EndsWith(".jpg")
-                || resourceUrl.EndsWith(".jpeg")
-                || resourceUrl.EndsWith(".jpe")
-                || resourceUrl.EndsWith(".gif")
-                || resourceUrl.EndsWith(".ico")
-                || resourceUrl.EndsWith(".pdf"))
-                {
-                    // For approved file extensions that we don't want to do any changes on
-                    var downloadUrl = rootUrl + resourceUrl;
-                    var filepath = rootPath + resourceUrl.Replace("/", "\\");
+                    case ".css":
+                        EnsureCssResources(rootUrl, rootPath, resourceUrl);
+                        break;
+                    case ".js":
+                    case ".woff":
+                    case ".woff2":
+                    case ".png":
+                    case ".jpg":
+                    case ".jpeg":
+                    case ".jpe":
+                    case ".gif":
+                    case ".ico":
+                    case ".pdf":
+                        // For approved file extensions that we don't need to do any changes on
+                        var downloadUrl = rootUrl + resourceUrl;
+                        var filepath = rootPath + resourceUrl.Replace("/", "\\");
 
-                    DownloadFile(downloadUrl, filepath);
-                }
-                else if (resourceUrl.EndsWith(".bmp")
-                    || resourceUrl.EndsWith(".mp4")
-                    || resourceUrl.EndsWith(".flv")
-                    || resourceUrl.EndsWith(".webm"))
-                {
-                    // don't download files of this extensions
-                }
-                else if (resourceUrl.EndsWith(".html")
-                    || resourceUrl.EndsWith(".htm")
-                    || resourceUrl.EndsWith("/"))
-                {
-                    // don't download web pages
-                }
-                else
-                {
-                    // TODO: Download and look if we recognize content-type
+                        DownloadFile(downloadUrl, filepath);
+                        break;
+                    case ".bmp":
+                    case ".mp4":
+                    case ".flv":
+                    case ".webm":
+                        // don't download of this extensions
+                        break;
+                    case ".html":
+                    case ".htm":
+                        // don't download web pages
+                        break;
+                    default:
+                        // We have no extension to go on, look at content-type
+                        break;
+
                 }
             }
         }
 
         private static void EnsureCssResources(string rootUrl, string rootPath, string url)
         {
-            // TODO: Download and ensure files referenced are downloaded also
+            // Download and ensure files referenced are downloaded also
             WebClient referencableClient = new WebClient();
+            referencableClient.Headers.Set(HttpRequestHeader.UserAgent, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36 StaticWebPlugin/0.1");
             referencableClient.Encoding = Encoding.UTF8;
             byte[] data = referencableClient.DownloadData(rootUrl + url);
             var content = Encoding.UTF8.GetString(data);
@@ -211,17 +211,13 @@ namespace EpiserverStaticWeb.Business
                     DownloadFile(rootUrl + resourceUrl, rootPath + resourceUrl.Replace("/", @"\"));
                 }
             }
-            // TODO: support download of referenced resources
-            // url\(["|']{0,1}(?<resource>[^[\)"|']+)
-
-            // TODO: check file extension and change filename
-            //resourceClient.ResponseHeaders.
         }
 
         private static void DownloadFile(string downloadUrl, string filepath)
         {
             using (WebClient resourceClient = new WebClient())
             {
+                resourceClient.Headers.Set(HttpRequestHeader.UserAgent, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36 StaticWebPlugin/0.1");
                 resourceClient.Encoding = Encoding.UTF8;
 
                 var directory = Path.GetDirectoryName(filepath);
