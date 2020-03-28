@@ -63,7 +63,7 @@ namespace EpiserverStaticWeb.Business
             if (orginalUrl == null)
                 return;
 
-            var rootPath = @"C:\inetpub\wwwroot";
+            var rootPath = @"C:\inetpub\example-site\EpiServerStaticWebExampleResultWebSite";
 
             var relativePath = orginalUrl.Replace("/", @"\");
             if (!relativePath.StartsWith(@"\"))
