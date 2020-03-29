@@ -208,6 +208,21 @@ namespace EpiserverStaticWeb.Business
                                 var jsFilepath = rootPath + newJsResourceUrl.Replace("/", "\\");
                                 WriteFile(jsFilepath, contentJs);
                                 return newJsResourceUrl;
+                            case "image/png":
+                            case "image/jpg":
+                            case "image/jpe":
+                            case "image/jpeg":
+                            case "image/gif":
+                            case "image/webp":
+                            case "application/pdf":
+                                // Let us get file extension (for example: .png)
+                                var fileExtension = "." + contentType.Split(new[] { "/" }, StringSplitOptions.RemoveEmptyEntries)[1];
+
+                                string newBinaryResourceUrl = GetNewResourceUrl(resourceUrl, fileExtension);
+
+                                var binaryFilepath = rootPath + newBinaryResourceUrl.Replace("/", "\\");
+                                WriteFile(binaryFilepath, data);
+                                return newBinaryResourceUrl;
                             default:
                                 // don't download unknown content type
                                 break;
