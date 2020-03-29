@@ -288,6 +288,7 @@
     <Compile Include="Business\Initialization\ExtendedTinyMceInitialization.cs" />
     <Compile Include="Business\Initialization\FilterConfig.cs" />
     <Compile Include="Business\Initialization\StaticWebDisplayModesInitialization.cs" />
+    <Compile Include="Business\IStaticWebService.cs" />
     <Compile Include="Business\PageContextActionFilter.cs" />
     <Compile Include="Business\PageTypeExtensions.cs" />
     <Compile Include="Business\PageViewContextFactory.cs" />
@@ -300,6 +301,9 @@
     <Compile Include="Business\SearchService.cs" />
     <Compile Include="Business\ServiceLocatorDependencyResolver.cs" />
     <Compile Include="Business\StaticWebEventInit.cs" />
+    <Compile Include="Business\StaticWebScheduledJob.cs" />
+    <Compile Include="Business\StaticWebService.cs" />
+    <Compile Include="Business\StaticWebServiceLocatorDependencyResolver.cs" />
     <Compile Include="Business\UIDescriptors\ContainerPageUIDescriptor.cs" />
     <Compile Include="Controllers\ContactBlockController.cs" />
     <Compile Include="Controllers\DefaultPageController.cs" />
