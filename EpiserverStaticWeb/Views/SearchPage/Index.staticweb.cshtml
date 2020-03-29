@@ -1,0 +1,10 @@
+@using EPiServer.Editor
+@using EPiServer.Security
+@model SearchContentModel
+
+@{
+    Layout = "~/Views/Shared/Layouts/_TwoPlusOne.cshtml";
+}
+
+<!-- StaticWeb - We are removing search as it is not working in the static version -->
+@Html.Partial("TemplateHint", Html.Translate("/searchpagetemplate/disabled"))

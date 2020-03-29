@@ -27,10 +27,6 @@
     </head>
 
     <body>
-        @{ 
-            Html.RenderPartial("Information", Model);
-        }
-
         @if (Model.Layout != null && Model.Layout.IsInReadonlyMode)
         {
                 Html.RenderPartial("Readonly", Model);

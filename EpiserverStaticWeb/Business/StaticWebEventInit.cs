@@ -28,13 +28,6 @@ namespace EpiserverStaticWeb.Business
 
         private void OnPublishedContent(object sender, ContentEventArgs e)
         {
-            var httpContext = HttpContext.Current;
-
-            if (httpContext == null)
-                return;
-
-            var httpContextBase = new HttpContextWrapper(httpContext);
-
             if (e.Content is PageData)
             {
                 var contentLink = e.ContentLink;
@@ -62,8 +55,15 @@ namespace EpiserverStaticWeb.Business
             if (orginalUrl == null)
                 return;
 
+
             var rootPath = @"C:\inetpub\example-site\EpiServerStaticWebExampleResultWebSite";
             var rootUrl = "http://localhost:49822/";
+
+            // NOTE: If publishing event comes from scheduled publishing (orginalUrl includes protocol, domain and port number)
+            if (!orginalUrl.StartsWith("/"))
+            {
+                orginalUrl = new Uri(orginalUrl).AbsolutePath;
+            }
 
             var relativePath = orginalUrl.Replace("/", @"\");
             if (!relativePath.StartsWith(@"\"))
@@ -75,10 +75,21 @@ namespace EpiserverStaticWeb.Business
                 relativePath = relativePath + @"\";
             }
 
+            string html = null;
             WebClient webClient = new WebClient();
             webClient.Headers.Set(HttpRequestHeader.UserAgent, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36 StaticWebPlugin/0.1");
             webClient.Encoding = Encoding.UTF8;
-            var html = webClient.DownloadString(rootUrl + orginalUrl);
+            try
+            {
+                html = webClient.DownloadString(rootUrl + orginalUrl);
+            }
+            catch (WebException)
+            {
+                // Ignore web exception, for example 404
+            }
+
+            if (html == null)
+                return;
 
             html = TryToFixLinkUrls(html);
 
@@ -112,8 +123,66 @@ namespace EpiserverStaticWeb.Business
 
         private static string EnsurePageResources(string rootUrl, string rootPath, string html)
         {
-            // TODO: make sure we have all resources for current page
+            var replaceResourcePairs = new Dictionary<string, string>();
+
+            // make sure we have all resources from script, link and img tags for current page
             // <(script|link|img).*(href|src)="(?<resource>[^"]+)
+            EnsureScriptAndLinkAndImgTagSupport(rootUrl, rootPath, ref html, ref replaceResourcePairs);
+
+            // make sure we have all source resources for current page
+            // <(source).*(srcset)="(?<resource>[^"]+)"
+            EnsureSourceTagSupport(rootUrl, rootPath, ref html, ref replaceResourcePairs);
+
+            // TODO: make sure we have all meta resources for current page
+            // Below matches ALL meta content that is a URL
+            // <(meta).*(content)="(?<resource>(http:\/\/|https:\/\/|\/)[^"]+)"
+            // Below matches ONLY known properties
+            // <(meta).*(property|name)="(twitter:image|og:image)".*(content)="(?<resource>[http:\/\/|https:\/\/|\/][^"]+)"
+
+
+            var sbHtml = new StringBuilder(html);
+            foreach (KeyValuePair<string, string> pair in replaceResourcePairs)
+            {
+                sbHtml = sbHtml.Replace(pair.Key, pair.Value);
+            }
+
+            return sbHtml.ToString();
+        }
+
+        private static void EnsureSourceTagSupport(string rootUrl, string rootPath, ref string html, ref Dictionary<string, string> replaceResourcePairs)
+        {
+            var matches = Regex.Matches(html, "<(source).*(srcset)=\"(?<resource>[^\"]+)\"");
+            foreach (Match match in matches)
+            {
+                var group = match.Groups["resource"];
+                if (group.Success)
+                {
+                    var value = group.Value;
+                    // Take into account that we can have many resource rules, for example: logo-768.png 768w, logo-768-1.5x.png 1.5x
+                    var resourceRules = value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (string resourceRule in resourceRules)
+                    {
+                        // Take into account that we can have rules here, not just resource url, for example: logo-768.png 768w
+                        var resourceInfo = resourceRule.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                        if (resourceInfo.Length < 1)
+                            continue;
+
+                        var resourceUrl = resourceInfo[0];
+                        var newResourceUrl = EnsureResource(rootUrl, rootPath, resourceUrl);
+                        if (!string.IsNullOrEmpty(newResourceUrl))
+                        {
+                            if (!replaceResourcePairs.ContainsKey(resourceUrl))
+                            {
+                                replaceResourcePairs.Add(resourceUrl, newResourceUrl);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private static void EnsureScriptAndLinkAndImgTagSupport(string rootUrl, string rootPath, ref string html, ref Dictionary<string, string> replaceResourcePairs)
+        {
             var matches = Regex.Matches(html, "<(script|link|img).*(href|src)=\"(?<resource>[^\"]+)");
             foreach (Match match in matches)
             {
@@ -124,20 +193,13 @@ namespace EpiserverStaticWeb.Business
                     var newResourceUrl = EnsureResource(rootUrl, rootPath, resourceUrl);
                     if (!string.IsNullOrEmpty(newResourceUrl))
                     {
-                        html = html.Replace(resourceUrl, newResourceUrl);
+                        if (!replaceResourcePairs.ContainsKey(resourceUrl))
+                        {
+                            replaceResourcePairs.Add(resourceUrl, newResourceUrl);
+                        }
                     }
                 }
             }
-
-            // TODO: make sure we have all source resources for current page
-            // <(source).*(srcset)="(?<resource>[^"]+)"
-
-            // TODO: make sure we have all meta resources for current page
-            // Below matches ALL meta content that is a URL
-            // <(meta).*(content)="(?<resource>(http:\/\/|https:\/\/|\/)[^"]+)"
-            // Below matches ONLY known properties
-            // <(meta).*(property|name)="(twitter:image|og:image)".*(content)="(?<resource>[http:\/\/|https:\/\/|\/][^"]+)"
-            return html;
         }
 
         private static string EnsureResource(string rootUrl, string rootPath, string resourceUrl)
@@ -238,9 +300,16 @@ namespace EpiserverStaticWeb.Business
 
         private static string GetNewResourceUrl(string resourceUrl, string extension)
         {
+            /* Ugly hack: remove as soon as possible
+             * make sure to not get a folder name with a file name, for example: /globalassets/alloy-plan/alloyplan.png/size700.png
+             * alloyplan.png here would cause error (IF we also have the orginal image) as we can't have a file and a folder with the same name.
+             */
+            resourceUrl = resourceUrl.Replace(".", "-");
+
             int queryIndex, hashIndex;
             queryIndex = resourceUrl.IndexOf("?");
             hashIndex = resourceUrl.IndexOf("#");
+
             string newResourceUrl = resourceUrl + extension;
             if (queryIndex >= 0)
             {
@@ -255,14 +324,21 @@ namespace EpiserverStaticWeb.Business
 
         private static void EnsureCssResources(string rootUrl, string rootPath, string url)
         {
-            // Download and ensure files referenced are downloaded also
-            WebClient referencableClient = new WebClient();
-            referencableClient.Headers.Set(HttpRequestHeader.UserAgent, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36 StaticWebPlugin/0.1");
-            referencableClient.Encoding = Encoding.UTF8;
-            byte[] data = referencableClient.DownloadData(rootUrl + url);
-            var content = Encoding.UTF8.GetString(data);
+            try
+            {
+                // Download and ensure files referenced are downloaded also
+                WebClient referencableClient = new WebClient();
+                referencableClient.Headers.Set(HttpRequestHeader.UserAgent, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36 StaticWebPlugin/0.1");
+                referencableClient.Encoding = Encoding.UTF8;
+                byte[] data = referencableClient.DownloadData(rootUrl + url);
+                var content = Encoding.UTF8.GetString(data);
 
-            EnsureCssResources(rootUrl, rootPath, url, content);
+                EnsureCssResources(rootUrl, rootPath, url, content);
+            }
+            catch (WebException)
+            {
+                // Ignore web exceptions, for example 404
+            }
         }
 
         private static void EnsureCssResources(string rootUrl, string rootPath, string url, string content)
@@ -373,7 +449,14 @@ namespace EpiserverStaticWeb.Business
                     Directory.CreateDirectory(directory);
                 }
 
-                resourceClient.DownloadFile(downloadUrl, filepath);
+                try
+                {
+                    resourceClient.DownloadFile(downloadUrl, filepath);
+                }
+                catch (WebException)
+                {
+                    // Ignore web exceptions like 404 errors
+                }
             }
         }
 

@@ -1,0 +1,25 @@
+@model IPageViewModel<SitePageData>
+<div class="row">
+    <div class="span12 footer">
+        <hr />
+        <div class="row">
+            <div class="span3">
+                <h3>@Html.Translate("/footer/products")</h3>
+                @Html.PropertyFor(x => x.Layout.ProductPages)
+            </div>
+            <div class="span3">
+                <h3>@Html.Translate("/footer/company")</h3>
+                @Html.PropertyFor(x => x.Layout.CompanyInformationPages)
+            </div>
+            <div class="span3">
+                <h3>@Html.Translate("/footer/news")</h3>
+                @Html.PropertyFor(x => x.Layout.NewsPages)
+            </div>
+            <div class="span3">
+                <h3>@Html.Translate("/footer/customerzone")</h3>
+                @Html.PropertyFor(x => x.Layout.CustomerZonePages)
+                <!-- StaticWeb - We are removing link to login as it is not working in the static version -->
+            </div>
+        </div>
+    </div>
+</div>

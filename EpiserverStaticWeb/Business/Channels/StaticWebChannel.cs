@@ -23,7 +23,7 @@ namespace EpiserverStaticWeb.Business.Channels
 
         public override bool IsActive(HttpContextBase context)
         {
-            var userAgent = context.GetOverriddenBrowser().Browser;
+            var userAgent = context.Request.UserAgent;
             return userAgent != null && userAgent.Contains("StaticWebPlugin");
         }
     }

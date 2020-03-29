@@ -467,8 +467,9 @@
     <Content Include="Views\ImageFile\Index.cshtml" />
     <Content Include="Views\ContactBlock\Index.cshtml" />
     <Content Include="Views\ArticlePage\Index.cshtml" />
-    <Content Include="Views\Shared\Information.cshtml" />
-    <Content Include="Views\Shared\Information.staticweb.cshtml" />
+    <Content Include="Views\Shared\Header.staticweb.cshtml" />
+    <Content Include="Views\SearchPage\Index.staticweb.cshtml" />
+    <Content Include="Views\Shared\Footer.staticweb.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
