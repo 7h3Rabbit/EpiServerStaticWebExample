@@ -82,7 +82,7 @@ namespace EpiserverStaticWeb.Business
 
             html = TryToFixLinkUrls(html);
 
-            EnsurePageResources(rootUrl, rootPath, html);
+            html = EnsurePageResources(rootUrl, rootPath, html);
 
             if (!Directory.Exists(rootPath + relativePath))
             {
@@ -110,7 +110,7 @@ namespace EpiserverStaticWeb.Business
             return html;
         }
 
-        private static void EnsurePageResources(string rootUrl, string rootPath, string html)
+        private static string EnsurePageResources(string rootUrl, string rootPath, string html)
         {
             // TODO: make sure we have all resources for current page
             // <(script|link|img).*(href|src)="(?<resource>[^"]+)
@@ -121,7 +121,11 @@ namespace EpiserverStaticWeb.Business
                 if (group.Success)
                 {
                     var resourceUrl = group.Value;
-                    EnsureResource(rootUrl, rootPath, resourceUrl);
+                    var newResourceUrl = EnsureResource(rootUrl, rootPath, resourceUrl);
+                    if (!string.IsNullOrEmpty(newResourceUrl))
+                    {
+                        html = html.Replace(resourceUrl, newResourceUrl);
+                    }
                 }
             }
 
@@ -133,9 +137,10 @@ namespace EpiserverStaticWeb.Business
             // <(meta).*(content)="(?<resource>(http:\/\/|https:\/\/|\/)[^"]+)"
             // Below matches ONLY known properties
             // <(meta).*(property|name)="(twitter:image|og:image)".*(content)="(?<resource>[http:\/\/|https:\/\/|\/][^"]+)"
+            return html;
         }
 
-        private static void EnsureResource(string rootUrl, string rootPath, string resourceUrl)
+        private static string EnsureResource(string rootUrl, string rootPath, string resourceUrl)
         {
             if (resourceUrl.StartsWith("/"))
             {
@@ -172,10 +177,65 @@ namespace EpiserverStaticWeb.Business
                         break;
                     default:
                         // We have no extension to go on, look at content-type
+                        WebClient referencableClient = new WebClient();
+                        referencableClient.Headers.Set(HttpRequestHeader.UserAgent, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36 StaticWebPlugin/0.1");
+                        referencableClient.Encoding = Encoding.UTF8;
+                        byte[] data = referencableClient.DownloadData(rootUrl + resourceUrl);
+
+                        var contentTypeResponse = referencableClient.ResponseHeaders[HttpResponseHeader.ContentType];
+                        if (string.IsNullOrEmpty(contentTypeResponse))
+                            return null;
+
+                        var contentType = contentTypeResponse.Split(new[] { ";" }, StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+                        if (string.IsNullOrEmpty(contentType))
+                            return null;
+
+                        contentType = contentType.Trim().ToLower();
+
+                        switch (contentType)
+                        {
+                            case "text/css":
+                                var contentCss = Encoding.UTF8.GetString(data);
+                                string newCssResourceUrl = GetNewResourceUrl(resourceUrl, ".css");
+
+                                EnsureCssResources(rootUrl, rootPath, newCssResourceUrl, contentCss);
+                                return newCssResourceUrl;
+                            case "text/javascript":
+                            case "application/javascript":
+                                var contentJs = Encoding.UTF8.GetString(data);
+                                string newJsResourceUrl = GetNewResourceUrl(resourceUrl, ".js");
+
+                                var jsFilepath = rootPath + newJsResourceUrl.Replace("/", "\\");
+                                WriteFile(jsFilepath, contentJs);
+                                return newJsResourceUrl;
+                            default:
+                                // don't download unknown content type
+                                break;
+                        }
+
                         break;
+
 
                 }
             }
+            return null;
+        }
+
+        private static string GetNewResourceUrl(string resourceUrl, string extension)
+        {
+            int queryIndex, hashIndex;
+            queryIndex = resourceUrl.IndexOf("?");
+            hashIndex = resourceUrl.IndexOf("#");
+            string newResourceUrl = resourceUrl + extension;
+            if (queryIndex >= 0)
+            {
+                newResourceUrl = resourceUrl.Substring(0, queryIndex) + extension + resourceUrl.Substring(queryIndex);
+            }
+            else if (hashIndex >= 0)
+            {
+                newResourceUrl = resourceUrl.Substring(0, hashIndex) + extension + resourceUrl.Substring(hashIndex);
+            }
+            return newResourceUrl;
         }
 
         private static void EnsureCssResources(string rootUrl, string rootPath, string url)
@@ -186,6 +246,13 @@ namespace EpiserverStaticWeb.Business
             referencableClient.Encoding = Encoding.UTF8;
             byte[] data = referencableClient.DownloadData(rootUrl + url);
             var content = Encoding.UTF8.GetString(data);
+
+            EnsureCssResources(rootUrl, rootPath, url, content);
+        }
+
+        private static void EnsureCssResources(string rootUrl, string rootPath, string url, string content)
+        {
+            // Download and ensure files referenced are downloaded also
 
             var matches = Regex.Matches(content, "url\\([\"|']{0,1}(?<resource>[^[\\)\"|']+)");
             foreach (Match match in matches)
@@ -211,10 +278,75 @@ namespace EpiserverStaticWeb.Business
                     DownloadFile(rootUrl + resourceUrl, rootPath + resourceUrl.Replace("/", @"\"));
                 }
             }
+
+            var filepath = rootPath + url.Replace("/", "\\");
+            WriteFile(filepath, content);
+        }
+
+        private static string EnsureFileSystemValid(string filepath)
+        {
+            int queryIndex, hashIndex;
+            queryIndex = filepath.IndexOf("?");
+            hashIndex = filepath.IndexOf("#");
+            var hashIsValid = hashIndex >= 0;
+            var queryIsValid = queryIndex >= 0;
+
+            if (queryIsValid || hashIsValid)
+            {
+                if (queryIsValid && hashIsValid)
+                {
+                    if (queryIndex < hashIndex)
+                    {
+                        filepath = filepath.Substring(0, queryIndex);
+                    }
+                    else
+                    {
+                        filepath = filepath.Substring(0, hashIndex);
+                    }
+                }
+                else
+                {
+                    if (queryIsValid)
+                    {
+                        filepath = filepath.Substring(0, queryIndex);
+                    }
+                    else
+                    {
+                        filepath = filepath.Substring(0, hashIndex);
+                    }
+                }
+            }
+
+            return filepath;
+        }
+
+        private static void WriteFile(string filepath, string content)
+        {
+            filepath = EnsureFileSystemValid(filepath);
+            var directory = Path.GetDirectoryName(filepath);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            File.WriteAllText(filepath, content);
+        }
+
+        private static void WriteFile(string filepath, byte[] data)
+        {
+            filepath = EnsureFileSystemValid(filepath);
+            var directory = Path.GetDirectoryName(filepath);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            File.WriteAllBytes(filepath, data);
         }
 
         private static void DownloadFile(string downloadUrl, string filepath)
         {
+            filepath = EnsureFileSystemValid(filepath);
             using (WebClient resourceClient = new WebClient())
             {
                 resourceClient.Headers.Set(HttpRequestHeader.UserAgent, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36 StaticWebPlugin/0.1");
