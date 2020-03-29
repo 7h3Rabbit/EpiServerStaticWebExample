@@ -59,7 +59,7 @@ namespace EpiserverStaticWeb.Business
             {
                 var langPage = _contentRepository.Get<PageData>(page.ContentLink.ToReferenceWithoutVersion(), lang);
                 var langContentLink = langPage.ContentLink.ToReferenceWithoutVersion();
-                _staticWebService.GeneratePage(langContentLink);
+                _staticWebService.GeneratePage(langContentLink, lang);
 
                 var children = _contentRepository.GetChildren<PageData>(langContentLink, lang);
                 foreach (PageData child in children)

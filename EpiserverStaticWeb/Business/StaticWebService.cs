@@ -5,6 +5,7 @@ using EPiServer.ServiceLocation;
 using EPiServer.Web.Routing;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -20,10 +21,10 @@ namespace EpiserverStaticWeb.Business
 
         }
 
-        public void GeneratePage(ContentReference contentLink)
+        public void GeneratePage(ContentReference contentLink, CultureInfo language)
         {
             var urlResolver = ServiceLocator.Current.GetInstance<UrlResolver>();
-            var orginalUrl = urlResolver.GetUrl(contentLink);
+            var orginalUrl = urlResolver.GetUrl(contentLink, language.Name);
             if (orginalUrl == null)
                 return;
 
@@ -81,7 +82,11 @@ namespace EpiserverStaticWeb.Business
 
             foreach (var page in pages)
             {
-                GeneratePage(page.ContentLink);
+                var languages = page.ExistingLanguages;
+                foreach (var lang in languages)
+                {
+                    GeneratePage(page.ContentLink, lang);
+                }
             }
 
         }

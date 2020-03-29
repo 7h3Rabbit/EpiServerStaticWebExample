@@ -25,12 +25,14 @@ namespace EpiserverStaticWeb.Business
             if (e.Content is PageData)
             {
                 var contentLink = e.ContentLink;
+                var page = e.Content as PageData;
 
                 var staticWebService = ServiceLocator.Current.GetInstance<IStaticWebService>();
-                staticWebService.GeneratePage(contentLink);
+                staticWebService.GeneratePage(contentLink, page.Language);
             }
             else if (e.Content is BlockData)
             {
+                var block = e.Content as BlockData;
                 var staticWebService = ServiceLocator.Current.GetInstance<IStaticWebService>();
                 staticWebService.GeneratePagesDependingOnBlock(e.ContentLink);
             }
