@@ -54,4 +54,4 @@ Project showcasing creating a static website but still using EpiServer CMS for e
 
 
 ## What extra functionality can be used ##
-- StaticWeb is registering a displaychannel called "StaticWeb" (See `Information.cshtml` and `Information.staticweb.cshtml` for examples on how to use it). It is perfect for removing functionality that can't be used in a static website (like filitering or search)
+- StaticWeb is registering a displaychannel called "StaticWeb" (See `Header.cshtml` and `Header.staticweb.cshtml` for examples on how to use it). It is perfect for removing functionality that can't be used in a static website (like filitering or search). It also makes it possible for you to view how the page will look and work on the static version.
