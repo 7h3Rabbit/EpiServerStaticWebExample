@@ -40,10 +40,9 @@ Project showcasing creating a static website but still using EpiServer CMS for e
 
 ## Installation ##
 
-- Copy `StaticWebEventInit.cs` into your project
-- Copy `StaticWebChannel.cs` and `StaticWebDisplayModesInitialization.cs` if you want to generate different things on dynamic site and static site.
-- Change `rootUrl` in StaticWebEventInit.cs to your website url (must allow anonymous access)
-- Change `rootPath` in StaticWebEventInit.cs to folder you want to write to (for example a GitHub repository folder)
+- Copy `StaticWebEpiserverPlugin` folder and add `StaticWebEpiserverPlugin.csproj` into your solution.
+- Change `rootUrl` in Initialization/StaticWebInitialization.cs to your website url (must allow anonymous access)
+- Change `rootPath` in Initialization/StaticWebInitialization.cs to folder you want to write to (for example a GitHub repository folder)
 
 
 
