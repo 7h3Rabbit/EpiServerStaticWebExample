@@ -5,10 +5,10 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("StaticWebEpiserverPlugin")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("StaticWeb Episerver Plugin")]
+[assembly: AssemblyDescription("Generate static webpages on publish event using EpiServer as CMS for editors")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("7h3Rabbit")]
 [assembly: AssemblyProduct("StaticWebEpiserverPlugin")]
 [assembly: AssemblyCopyright("Copyright ©  2020")]
 [assembly: AssemblyTrademark("")]
