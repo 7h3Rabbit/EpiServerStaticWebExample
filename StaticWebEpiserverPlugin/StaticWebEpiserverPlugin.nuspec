@@ -15,5 +15,8 @@
     <releaseNotes>Initial release. Includes generating pages on publishing event and scheduled job</releaseNotes>
     <copyright>Copyright 2020</copyright>
     <tags>episerver static-site-generator episerver-cms episerver-plugin plugin</tags>
+    <dependencies>
+      <group targetFramework=".NETFramework4.7.2" />
+    </dependencies>
   </metadata>
 </package>
