@@ -41,8 +41,11 @@ Project showcasing creating a static website but still using EpiServer CMS for e
 ## Installation ##
 
 - Copy `StaticWebEpiserverPlugin` folder and add `StaticWebEpiserverPlugin.csproj` into your solution.
-- Change `rootUrl` in Initialization/StaticWebInitialization.cs to your website url (must allow anonymous access)
-- Change `rootPath` in Initialization/StaticWebInitialization.cs to folder you want to write to (for example a GitHub repository folder)
+- added new property `StaticWeb:OutputFolder` to appSettings section in Web.config (for example a GitHub repository folder). Example: `<add key="StaticWeb:OutputFolder" value="C:\inetpub\wwwroot" />`
+- added new property `StaticWeb:InputUrl` to appSettings section in Web.config (must allow anonymous access). Example: `<add key="StaticWeb:InputUrl" value="http://localhost:49822/" />`
+- You are ready to go :)
+
+
 
 
 
