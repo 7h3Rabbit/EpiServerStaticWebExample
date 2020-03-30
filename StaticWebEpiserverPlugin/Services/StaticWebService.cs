@@ -5,6 +5,7 @@ using EPiServer.ServiceLocation;
 using EPiServer.Web.Routing;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -16,9 +17,70 @@ namespace StaticWebEpiserverPlugin.Services
 {
     public class StaticWebService : IStaticWebService
     {
+        protected string _rootUrl = null;
+        protected string _rootPath = null;
+
         public StaticWebService()
         {
+            _rootPath = ConfigurationManager.AppSettings["StaticWeb:OutputFolder"];
+            ValidateOutputFolder();
 
+            _rootUrl = ConfigurationManager.AppSettings["StaticWeb:InputUrl"];
+            ValidateInputUrl();
+        }
+
+        private void ValidateInputUrl()
+        {
+            if (string.IsNullOrEmpty(_rootUrl))
+            {
+                throw new ArgumentException("Missing value for 'StaticWeb:InputUrl'", "StaticWeb:InputUrl");
+            }
+
+            try
+            {
+                // Try to parse as Uri to validate value
+                var testUrl = new Uri(_rootUrl);
+            }
+            catch (Exception)
+            {
+                throw new ArgumentException("Invalid value for 'StaticWeb:InputUrl'", "StaticWeb:InputUrl");
+            }
+        }
+
+        protected void ValidateOutputFolder()
+        {
+            if (string.IsNullOrEmpty(_rootPath))
+            {
+                throw new ArgumentException("Missing value for 'StaticWeb:OutputFolder'", "StaticWeb:OutputFolder");
+            }
+
+            if (!Directory.Exists(_rootPath))
+            {
+                throw new ArgumentException("Folder specified in 'StaticWeb:OutputFolder' doesn't exist", "StaticWeb:OutputFolder");
+            }
+
+            try
+            {
+                var directory = new DirectoryInfo(_rootPath);
+                var directoryName = directory.FullName;
+                var fileName = directoryName + Path.DirectorySeparatorChar + ".staticweb-access-test";
+
+                // verifying write access
+                File.WriteAllText(fileName, "Verifying write access to folder");
+                // verify modify access
+                File.WriteAllText(fileName, "Verifying modify access to folder");
+                // verify delete access
+                File.Delete(fileName);
+
+            }
+            catch (UnauthorizedAccessException)
+            {
+                throw new ArgumentException("Not sufficient permissions for folder specified in 'StaticWeb:OutputFolder'. Require read, write and modify permissions", "StaticWeb:OutputFolder");
+            }
+            catch (Exception)
+            {
+                throw new ArgumentException("Unknown error when testing write, edit and remove access to folder specified in 'StaticWeb:OutputFolder'", "StaticWeb:OutputFolder");
+            }
         }
 
         public void GeneratePage(ContentReference contentLink, CultureInfo language)
@@ -27,9 +89,6 @@ namespace StaticWebEpiserverPlugin.Services
             var orginalUrl = urlResolver.GetUrl(contentLink, language.Name);
             if (orginalUrl == null)
                 return;
-
-            var rootPath = @"C:\inetpub\example-site\EpiServerStaticWebExampleResultWebSite";
-            var rootUrl = "http://localhost:49822/";
 
             // NOTE: If publishing event comes from scheduled publishing (orginalUrl includes protocol, domain and port number)
             if (!orginalUrl.StartsWith("/"))
@@ -53,7 +112,7 @@ namespace StaticWebEpiserverPlugin.Services
             webClient.Encoding = Encoding.UTF8;
             try
             {
-                html = webClient.DownloadString(rootUrl + orginalUrl);
+                html = webClient.DownloadString(_rootUrl + orginalUrl);
             }
             catch (WebException)
             {
@@ -65,14 +124,14 @@ namespace StaticWebEpiserverPlugin.Services
 
             html = TryToFixLinkUrls(html);
 
-            html = EnsurePageResources(rootUrl, rootPath, html);
+            html = EnsurePageResources(_rootUrl, _rootPath, html);
 
-            if (!Directory.Exists(rootPath + relativePath))
+            if (!Directory.Exists(_rootPath + relativePath))
             {
-                Directory.CreateDirectory(rootPath + relativePath);
+                Directory.CreateDirectory(_rootPath + relativePath);
             }
 
-            File.WriteAllText(rootPath + relativePath + "index.html", html);
+            File.WriteAllText(_rootPath + relativePath + "index.html", html);
         }
 
         public void GeneratePagesDependingOnBlock(ContentReference contentLink)
