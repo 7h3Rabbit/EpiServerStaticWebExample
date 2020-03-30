@@ -103,6 +103,12 @@ namespace EpiserverStaticWeb.Business
                 {
                     var resourceUrl = group.Value;
                     var correctUrl = urlResolver.GetUrl(resourceUrl);
+                    // NOTE: If publishing event comes from scheduled publishing (correctUrl includes protocol, domain and port number)
+                    if (!correctUrl.StartsWith("/"))
+                    {
+                        correctUrl = new Uri(correctUrl).AbsolutePath;
+                    }
+
                     html = html.Replace(resourceUrl, correctUrl);
                 }
             }
