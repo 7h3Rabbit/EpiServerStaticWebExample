@@ -90,6 +90,11 @@ namespace StaticWebEpiserverPlugin.Services
             if (orginalUrl == null)
                 return;
 
+            if (orginalUrl.StartsWith("//"))
+            {
+                return;
+            }
+
             // NOTE: If publishing event comes from scheduled publishing (orginalUrl includes protocol, domain and port number)
             if (!orginalUrl.StartsWith("/"))
             {
@@ -162,6 +167,12 @@ namespace StaticWebEpiserverPlugin.Services
                 {
                     var resourceUrl = group.Value;
                     var correctUrl = urlResolver.GetUrl(resourceUrl);
+
+                    if (correctUrl.StartsWith("//"))
+                    {
+                        continue;
+                    }
+
                     // NOTE: If publishing event comes from scheduled publishing (correctUrl includes protocol, domain and port number)
                     if (!correctUrl.StartsWith("/"))
                     {
@@ -257,6 +268,11 @@ namespace StaticWebEpiserverPlugin.Services
 
         protected static string EnsureResource(string rootUrl, string rootPath, string resourceUrl)
         {
+            if (resourceUrl.StartsWith("//"))
+            {
+                return null;
+            }
+
             if (resourceUrl.StartsWith("/"))
             {
                 switch (Path.GetExtension(resourceUrl).ToLower())

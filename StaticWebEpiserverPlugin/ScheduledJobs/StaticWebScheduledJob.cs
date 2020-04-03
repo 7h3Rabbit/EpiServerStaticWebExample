@@ -99,6 +99,11 @@ namespace StaticWebEpiserverPlugin.ScheduledJobs
             if (orginalUrl == null)
                 return;
 
+            if (!orginalUrl.StartsWith("//"))
+            {
+                return;
+            }
+
             // NOTE: If publishing event comes from scheduled publishing (orginalUrl includes protocol, domain and port number)
             if (!orginalUrl.StartsWith("/"))
             {
