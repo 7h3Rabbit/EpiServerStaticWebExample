@@ -83,7 +83,7 @@ namespace StaticWebEpiserverPlugin.Services
             }
         }
 
-        public void GeneratePage(ContentReference contentLink, CultureInfo language)
+        public void GeneratePage(ContentReference contentLink, CultureInfo language, Dictionary<string, string> generatedResources = null)
         {
             var urlResolver = ServiceLocator.Current.GetInstance<UrlResolver>();
             var orginalUrl = urlResolver.GetUrl(contentLink, language.Name);
@@ -129,7 +129,7 @@ namespace StaticWebEpiserverPlugin.Services
 
             html = TryToFixLinkUrls(html);
 
-            html = EnsurePageResources(_rootUrl, _rootPath, html);
+            html = EnsurePageResources(_rootUrl, _rootPath, html, generatedResources);
 
             if (!Directory.Exists(_rootPath + relativePath))
             {
@@ -185,9 +185,12 @@ namespace StaticWebEpiserverPlugin.Services
             return html;
         }
 
-        protected static string EnsurePageResources(string rootUrl, string rootPath, string html)
+        protected static string EnsurePageResources(string rootUrl, string rootPath, string html, Dictionary<string, string> replaceResourcePairs = null)
         {
-            var replaceResourcePairs = new Dictionary<string, string>();
+            if (replaceResourcePairs == null)
+            {
+                replaceResourcePairs = new Dictionary<string, string>();
+            }
 
             // make sure we have all resources from script, link and img tags for current page
             // <(script|link|img).*(href|src)="(?<resource>[^"]+)
@@ -207,7 +210,11 @@ namespace StaticWebEpiserverPlugin.Services
             var sbHtml = new StringBuilder(html);
             foreach (KeyValuePair<string, string> pair in replaceResourcePairs)
             {
-                sbHtml = sbHtml.Replace(pair.Key, pair.Value);
+                // We have a value if we want to replace orginal url with a new one
+                if (pair.Value != null)
+                {
+                    sbHtml = sbHtml.Replace(pair.Key, pair.Value);
+                }
             }
 
             return sbHtml.ToString();
@@ -232,12 +239,29 @@ namespace StaticWebEpiserverPlugin.Services
                             continue;
 
                         var resourceUrl = resourceInfo[0];
+
+                        if (replaceResourcePairs.ContainsKey(resourceUrl))
+                        {
+                            /**
+                             * If we have already downloaded resource, we don't need to download it again.
+                             * Not only usefull for pages repeating same resource but also in our Scheduled job where we try to generate all pages.
+                             **/
+                            continue;
+                        }
+
                         var newResourceUrl = EnsureResource(rootUrl, rootPath, resourceUrl);
                         if (!string.IsNullOrEmpty(newResourceUrl))
                         {
                             if (!replaceResourcePairs.ContainsKey(resourceUrl))
                             {
                                 replaceResourcePairs.Add(resourceUrl, newResourceUrl);
+                            }
+                        }
+                        else
+                        {
+                            if (!replaceResourcePairs.ContainsKey(resourceUrl))
+                            {
+                                replaceResourcePairs.Add(resourceUrl, null);
                             }
                         }
                     }
@@ -254,12 +278,28 @@ namespace StaticWebEpiserverPlugin.Services
                 if (group.Success)
                 {
                     var resourceUrl = group.Value;
+                    if (replaceResourcePairs.ContainsKey(resourceUrl))
+                    {
+                        /**
+                         * If we have already downloaded resource, we don't need to download it again.
+                         * Not only usefull for pages repeating same resource but also in our Scheduled job where we try to generate all pages.
+                         **/
+                        continue;
+                    }
+
                     var newResourceUrl = EnsureResource(rootUrl, rootPath, resourceUrl);
                     if (!string.IsNullOrEmpty(newResourceUrl))
                     {
                         if (!replaceResourcePairs.ContainsKey(resourceUrl))
                         {
                             replaceResourcePairs.Add(resourceUrl, newResourceUrl);
+                        }
+                    }
+                    else
+                    {
+                        if (!replaceResourcePairs.ContainsKey(resourceUrl))
+                        {
+                            replaceResourcePairs.Add(resourceUrl, null);
                         }
                     }
                 }

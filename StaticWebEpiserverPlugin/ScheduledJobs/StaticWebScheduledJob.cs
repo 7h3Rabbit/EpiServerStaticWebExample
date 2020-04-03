@@ -7,6 +7,7 @@ using EPiServer.Web;
 using EPiServer.Web.Routing;
 using StaticWebEpiserverPlugin.Services;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 
 namespace StaticWebEpiserverPlugin.ScheduledJobs
@@ -14,11 +15,13 @@ namespace StaticWebEpiserverPlugin.ScheduledJobs
     [ScheduledPlugIn(DisplayName = "Generate StaticWeb", GUID = "da758e76-02ec-449e-8b34-999769cafb68")]
     public class StaticWebScheduledJob : ScheduledJobBase
     {
-        private bool _stopSignaled;
+        protected bool _stopSignaled;
         protected IStaticWebService _staticWebService;
         protected IContentRepository _contentRepository;
         protected UrlResolver _urlResolver;
         protected long _numberOfPages = 0;
+        protected Dictionary<int, string> _generatedPages;
+        protected Dictionary<string, string> _generatedResources;
 
         public StaticWebScheduledJob()
         {
@@ -48,6 +51,8 @@ namespace StaticWebEpiserverPlugin.ScheduledJobs
 
             // Setting number of pages to start value (0), it is used to show message after job is done
             _numberOfPages = 0;
+            _generatedPages = new Dictionary<int, string>();
+            _generatedResources = new Dictionary<string, string>();
 
             //Add implementation
             var startPage = SiteDefinition.Current.StartPage.ToReferenceWithoutVersion();
@@ -58,8 +63,15 @@ namespace StaticWebEpiserverPlugin.ScheduledJobs
             return $"{_numberOfPages} of pages where generated with all depending resources.";
         }
 
-        private void GeneratePageInAllLanguages(PageData page)
+        protected void GeneratePageInAllLanguages(PageData page)
         {
+            // Only add pages once (have have this because of how websites can be setup to have a circle reference
+            if (page.ContentLink == null || _generatedPages.ContainsKey(page.ContentLink.ID))
+            {
+                return;
+            }
+            _generatedPages.Add(page.ContentLink.ID, null);
+
             var languages = page.ExistingLanguages;
             foreach (var lang in languages)
             {
@@ -68,7 +80,8 @@ namespace StaticWebEpiserverPlugin.ScheduledJobs
                 UpdateScheduledJobStatus(page, lang);
 
                 var langContentLink = langPage.ContentLink.ToReferenceWithoutVersion();
-                _staticWebService.GeneratePage(langContentLink, lang);
+
+                _staticWebService.GeneratePage(langContentLink, lang, _generatedResources);
                 _numberOfPages++;
 
                 var children = _contentRepository.GetChildren<PageData>(langContentLink, lang);
@@ -93,13 +106,13 @@ namespace StaticWebEpiserverPlugin.ScheduledJobs
             }
         }
 
-        private void UpdateScheduledJobStatus(PageData page, CultureInfo lang)
+        protected void UpdateScheduledJobStatus(PageData page, CultureInfo lang)
         {
             var orginalUrl = _urlResolver.GetUrl(page.ContentLink.ToReferenceWithoutVersion(), lang.Name);
             if (orginalUrl == null)
                 return;
 
-            if (!orginalUrl.StartsWith("//"))
+            if (orginalUrl.StartsWith("//"))
             {
                 return;
             }
