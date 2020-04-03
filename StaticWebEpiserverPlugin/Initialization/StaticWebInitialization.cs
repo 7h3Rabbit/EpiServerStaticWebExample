@@ -3,6 +3,7 @@ using EPiServer.Core;
 using EPiServer.Framework;
 using EPiServer.Framework.Initialization;
 using EPiServer.ServiceLocation;
+using StaticWebEpiserverPlugin.Interfaces;
 using StaticWebEpiserverPlugin.Services;
 using System.Web.Mvc;
 
@@ -23,6 +24,11 @@ namespace StaticWebEpiserverPlugin.Initialization
 
         private void OnPublishedContent(object sender, ContentEventArgs e)
         {
+            if (e.Content is IStaticWebIgnoreGenerate)
+            {
+                return;
+            }
+
             if (e.Content is PageData)
             {
                 var contentLink = e.ContentLink;
