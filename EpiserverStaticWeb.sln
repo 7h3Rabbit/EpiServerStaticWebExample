@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.29920.165
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EpiserverAlloy", "EpiserverAlloy\EpiserverAlloy.csproj", "{AF8D947D-3ACD-41A7-BF6A-0A546EBD3822}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StaticWebEpiserverPlugin", "StaticWebEpiserverPlugin\StaticWebEpiserverPlugin.csproj", "{1D22F30F-156B-4B34-B6DC-61A2794DEF2C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StaticWebEpiserverPlugin", "..\StaticWebEpiserverPlugin\StaticWebEpiserverPlugin.csproj", "{1D22F30F-156B-4B34-B6DC-61A2794DEF2C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

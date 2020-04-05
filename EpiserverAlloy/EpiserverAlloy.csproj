@@ -357,12 +357,6 @@
     <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\StaticWebEpiserverPlugin\StaticWebEpiserverPlugin.csproj">
-      <Project>{1d22f30f-156b-4b34-b6dc-61a2794def2c}</Project>
-      <Name>StaticWebEpiserverPlugin</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="ClientResources\Images\icons\layoutIcons24x24.png" />
     <Content Include="ClientResources\Scripts\Editors\StringList.js" />
     <Content Include="ClientResources\Styles\LayoutIcons.css" />
@@ -479,6 +473,12 @@
     <None Include="Web.Release.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\StaticWebEpiserverPlugin\StaticWebEpiserverPlugin.csproj">
+      <Project>{1d22f30f-156b-4b34-b6dc-61a2794def2c}</Project>
+      <Name>StaticWebEpiserverPlugin</Name>
+    </ProjectReference>
   </ItemGroup>
   <ProjectExtensions>
     <VisualStudio>
