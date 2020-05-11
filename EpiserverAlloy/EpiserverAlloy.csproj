@@ -286,7 +286,7 @@
     <Compile Include="Business\Initialization\DisplayRegistryInitialization.cs" />
     <Compile Include="Business\Initialization\ExtendedTinyMceInitialization.cs" />
     <Compile Include="Business\Initialization\FilterConfig.cs" />
-    <Compile Include="Business\IStaticWebService.cs" />
+    <Compile Include="Business\Initialization\StaticWebRequiredCssDemoInitialization.cs" />
     <Compile Include="Business\PageContextActionFilter.cs" />
     <Compile Include="Business\PageTypeExtensions.cs" />
     <Compile Include="Business\PageViewContextFactory.cs" />
@@ -475,6 +475,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\StaticWebEpiserverPlugin.RequiredCssOnly\StaticWebEpiserverPlugin.RequiredCssOnly.csproj">
+      <Project>{22abf8e1-a733-4c1f-b76b-dc12158e5cf1}</Project>
+      <Name>StaticWebEpiserverPlugin.RequiredCssOnly</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\StaticWebEpiserverPlugin\StaticWebEpiserverPlugin.csproj">
       <Project>{1d22f30f-156b-4b34-b6dc-61a2794def2c}</Project>
       <Name>StaticWebEpiserverPlugin</Name>

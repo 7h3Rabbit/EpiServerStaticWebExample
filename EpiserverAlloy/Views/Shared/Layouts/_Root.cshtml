@@ -22,6 +22,9 @@
         @Html.CanonicalLink()
         @Html.AlternateLinks()
         @Styles.Render("~/bundles/css")
+        @{
+            Scripts.DefaultTagFormat = "<script defer src=\"{0}\"></script>";
+        }
         @Scripts.Render("~/bundles/js")
         @Html.RequiredClientResources("Header") @*Enable components to require resources. For an example, see the view for VideoBlock.*@
     </head>
