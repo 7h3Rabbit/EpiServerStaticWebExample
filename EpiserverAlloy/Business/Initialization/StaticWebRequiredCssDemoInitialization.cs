@@ -1,7 +1,7 @@
 ﻿using EPiServer.Framework;
 using EPiServer.Framework.Initialization;
 using EPiServer.ServiceLocation;
-using StaticWebEpiserverPlugin.RequiredCssOnly.Interfaces;
+using StaticWebEpiserverPlugin.Configuration;
 using StaticWebEpiserverPlugin.RequiredCssOnly.Services;
 using StaticWebEpiserverPlugin.Services;
 using System.Linq;
@@ -16,7 +16,8 @@ namespace EpiserverStaticWeb.Business.Initialization
         public void Initialize(InitializationEngine context)
         {
             _staticWebService = ServiceLocator.Current.GetInstance<IStaticWebService>();
-            if (_staticWebService.Enabled)
+            var configuration = StaticWebConfiguration.CurrentSite;
+            if (configuration != null && configuration.Enabled)
             {
                 _staticWebService.AfterEnsurePageResources += OnAfterEnsurePageResources;
             }
@@ -27,6 +28,12 @@ namespace EpiserverStaticWeb.Business.Initialization
             if (e.Content == null)
                 return;
 
+            var configuration = StaticWebConfiguration.CurrentSite;
+            if (configuration == null || !configuration.Enabled)
+            {
+                return;
+            }
+
             var html = e.Content;
 
             var requiredCssService = ServiceLocator.Current.GetInstance<RequiredCssOnlyService>();
@@ -34,7 +41,7 @@ namespace EpiserverStaticWeb.Business.Initialization
             var cssResources = e.CurrentResources.Where(resource => resource.Value != null && resource.Value.EndsWith(".css")).Select(pair => pair.Value);
             foreach (var resource in cssResources)
             {
-                var filePath = _staticWebService.RootPath + resource.Replace("/", "\\");
+                var filePath = configuration.OutputPath + resource.Replace("/", "\\");
                 if (!System.IO.File.Exists(filePath))
                 {
                     continue;
