@@ -16,7 +16,7 @@ namespace EpiserverStaticWeb.Business.Initialization
         public void Initialize(InitializationEngine context)
         {
             _staticWebService = ServiceLocator.Current.GetInstance<IStaticWebService>();
-            var configuration = StaticWebConfiguration.Current;
+            var configuration = StaticWebConfiguration.CurrentSite;
             if (configuration != null && configuration.Enabled)
             {
                 _staticWebService.AfterEnsurePageResources += OnAfterEnsurePageResources;
@@ -28,7 +28,7 @@ namespace EpiserverStaticWeb.Business.Initialization
             if (e.Content == null)
                 return;
 
-            var configuration = StaticWebConfiguration.Current;
+            var configuration = StaticWebConfiguration.CurrentSite;
             if (configuration == null || !configuration.Enabled)
             {
                 return;
