@@ -290,6 +290,7 @@
     <Compile Include="Business\Initialization\DisplayRegistryInitialization.cs" />
     <Compile Include="Business\Initialization\ExtendedTinyMceInitialization.cs" />
     <Compile Include="Business\Initialization\FilterConfig.cs" />
+    <Compile Include="Business\Initialization\StaticWebRegressionTestsInitialization.cs" />
     <Compile Include="Business\Initialization\StaticWebRequiredCssDemoInitialization.cs" />
     <Compile Include="Business\PageContextActionFilter.cs" />
     <Compile Include="Business\PageTypeExtensions.cs" />

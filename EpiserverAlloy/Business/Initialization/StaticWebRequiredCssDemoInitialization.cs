@@ -53,6 +53,8 @@ namespace EpiserverStaticWeb.Business.Initialization
                 html = html.Replace(@"<link href=""" + resource + @""" rel=""stylesheet""/>", $"<style>{newCssContent}</style>");
             }
 
+            html = html.Replace("</body>", "<!-- RequiredCssDemo --></body>");
+
             e.Content = html;
         }
 
