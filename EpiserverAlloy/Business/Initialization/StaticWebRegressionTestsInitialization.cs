@@ -60,9 +60,9 @@ namespace EpiserverStaticWeb.Business.Initialization
                 throw new ArgumentException("ForRegressionTesting - CurrentResources property must not be null", nameof(e.CurrentResources));
             }
 
-            if (e.FilePath == null)
+            if (e.FilePaths == null)
             {
-                throw new ArgumentException("ForRegressionTesting - FilePath property must not be null", nameof(e.FilePath));
+                throw new ArgumentException("ForRegressionTesting - FilePaths property must not be null", nameof(e.FilePaths));
             }
 
             // NOTE: Below is for regression testing purpose only
@@ -101,9 +101,9 @@ namespace EpiserverStaticWeb.Business.Initialization
                 throw new ArgumentException("ForRegressionTesting - CurrentResources property must not be null", nameof(e.CurrentResources));
             }
 
-            if (e.FilePath == null)
+            if (e.FilePaths == null)
             {
-                throw new ArgumentException("ForRegressionTesting - FilePath property must not be null", nameof(e.FilePath));
+                throw new ArgumentException("ForRegressionTesting - FilePaths property must not be null", nameof(e.FilePaths));
             }
 
             // NOTE: Below is for regression testing purpose only
@@ -259,15 +259,15 @@ namespace EpiserverStaticWeb.Business.Initialization
 
         private static void BasicSanityCheck(StaticWebEpiserverPlugin.Events.StaticWebGeneratePageEventArgs e)
         {
-            if (e.ContentLink == null)
-            {
-                throw new ArgumentException("ForRegressionTesting - ContentLink property must not be null", nameof(e.ContentLink));
-            }
+            //if (e..ContentLink == null)
+            //{
+            //    throw new ArgumentException("ForRegressionTesting - ContentLink property must not be null", nameof(e.ContentLink));
+            //}
 
-            if (e.CultureInfo == null)
-            {
-                throw new ArgumentException("ForRegressionTesting - CultureInfo property must not be null", nameof(e.CultureInfo));
-            }
+            //if (e.CultureInfo == null)
+            //{
+            //    throw new ArgumentException("ForRegressionTesting - CultureInfo property must not be null", nameof(e.CultureInfo));
+            //}
 
             if (e.Items == null)
             {
