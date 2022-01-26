@@ -25,3 +25,31 @@
 
     @Html.PropertyFor(x => x.CurrentPage.RelatedContentArea, new { CssClass = "row", Tag = Global.ContentAreaTags.OneThirdWidth })
 }
+
+
+SVG Icon test:
+<button aria-expanded="true" aria-label="Test string 0">
+    <span>
+        <svg class="icon icon-minus" aria-hidden="true" focusable="false">
+            <use xlink:href="/Static/img/svg-icons.svg#icon-minus"></use>
+        </svg>
+    </span>
+</button>
+
+
+<ul>
+    <li>
+        <svg class="icon icon-text-document" role="img" focusable="false" aria-labelledby="i2694">
+            <desc id="i2694">Text string 1</desc>
+            <use xlink:href="/Static/img/svg-icons.svg#icon-text-document"></use>
+        </svg>
+        <span>Test string 2</span>
+    </li>
+    <li>
+        <svg class="icon icon-pencil" role="img" focusable="false" aria-labelledby="i2694">
+            <desc id="i2694">Text string 1</desc>
+            <use xlink:href="/Static/img/svg-icons.svg#icon-pencil"></use>
+        </svg>
+        <span>Test string 2</span>
+    </li>
+</ul>

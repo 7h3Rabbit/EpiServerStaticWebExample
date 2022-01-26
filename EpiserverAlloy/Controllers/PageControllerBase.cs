@@ -34,6 +34,8 @@ namespace EpiserverStaticWeb.Controllers
 
         public virtual void ModifyLayout(LayoutModel layoutModel)
         {
+            //System.Threading.Thread.Sleep(1000);
+
             var page = PageContext.Page as SitePageData;
             if(page != null)
             {

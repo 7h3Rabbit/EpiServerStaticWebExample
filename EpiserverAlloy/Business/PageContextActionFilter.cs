@@ -26,15 +26,14 @@ namespace EpiserverStaticWeb.Business
         {
             var viewModel = filterContext.Controller.ViewData.Model;
 
-            var model = viewModel as IPageViewModel<SitePageData>;
-            if (model != null)
+            if (viewModel is IPageViewModel<SitePageData> model)
             {
                 var currentContentLink = filterContext.RequestContext.GetContentLink();
 
                 var layoutModel = model.Layout ?? _contextFactory.CreateLayoutModel(currentContentLink, filterContext.RequestContext);
 
                 var layoutController = filterContext.Controller as IModifyLayout;
-                if(layoutController != null)
+                if (layoutController != null)
                 {
                     layoutController.ModifyLayout(layoutModel);
                 }

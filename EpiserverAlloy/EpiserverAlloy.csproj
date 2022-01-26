@@ -409,6 +409,7 @@
     <Content Include="Static\html\error.htm" />
     <Content Include="Static\img\glyphicons-halflings-white.png" />
     <Content Include="Static\img\glyphicons-halflings.png" />
+    <Content Include="Static\img\svg-icons.svg" />
     <Content Include="Static\js\bootstrap.js" />
     <Content Include="Static\js\jquery.js" />
     <Content Include="Static\jwplayer\jwplayer.js" />

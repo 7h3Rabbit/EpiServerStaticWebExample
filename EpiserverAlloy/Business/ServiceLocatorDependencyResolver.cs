@@ -39,8 +39,7 @@ namespace EpiserverStaticWeb.Business
 
         private object GetInterfaceService(Type serviceType)
         {
-            object instance;
-            return _serviceLocator.TryGetExistingInstance(serviceType, out instance) ? instance : null;
+            return _serviceLocator.TryGetExistingInstance(serviceType, out object instance) ? instance : null;
         }
 
         public IEnumerable<object> GetServices(Type serviceType)
